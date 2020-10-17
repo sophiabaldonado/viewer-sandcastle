@@ -95,7 +95,7 @@ class ViewerView extends Croquet.View {
   }
 
   LoadPhoto(data) {
-    this.currentPhoto = data.photoIndex;
+    this.Select(data.photoIndex);
   }
 
   CreateSkybox() {
@@ -128,11 +128,15 @@ class ViewerView extends Croquet.View {
     this.scene.add(this.selectionOrb);
   }
 
-  CyclePhoto() {
-    this.currentPhoto = this.NextPhoto();
+  Select(index) {
+    this.currentPhoto = index;
 
     this.skybox.material.map = this.photos[this.currentPhoto];
     this.selectionOrb.material.map = this.photos[this.NextPhoto()]
+  }
+
+  CyclePhoto() {
+    this.Select(this.NextPhoto());
   }
 
   NextPhoto() {
