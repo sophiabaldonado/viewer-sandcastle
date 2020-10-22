@@ -134,6 +134,8 @@ class ViewerView extends Croquet.View {
 
   CyclePhoto() {
     this.Select(this.NextPhoto());
+    let data = { photoIndex: this.currentPhoto };
+    this.publish("viewer", "remoteselectphoto", data);
   }
 
   NextPhoto() {
