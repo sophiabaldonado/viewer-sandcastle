@@ -141,17 +141,12 @@ State.eventHandler.addEventListener("inputsourceschange", e => {
   XRInput.controllerGrips = [];
   XRInput.inputSources = e.session.inputSources;
 
-  // metachromium-specific hack to fix nonconformance bug
-  const isUserAgentMetachromium = navigator.userAgent.indexOf("Mchr") !== -1;
-  const inputNum = isUserAgentMetachromium ? 2 : XRInput.inputSources.length;
+  const inputNum = XRInput.inputSources.length;
 
   for (let i = 0; i < inputNum; i++) {
-    if (
-      isUserAgentMetachromium ||
-      XRInput.inputSources[i].gripSpace != undefined
-    ) {
-      if (State.debugMode) console.log("adding controller grip " + i);
-      XRInput.controllerGrips[i] = Renderer.xr.getControllerGrip(i);
+    if (XRInput.inputSources[i].gripSpace) {
+      if (State.debugMode) console.log("adding controller " + i);
+      XRInput.controllerGrips[i] = Renderer.xr.getController(i);
     }
   }
 });

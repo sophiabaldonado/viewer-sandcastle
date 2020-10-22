@@ -17,9 +17,6 @@ import XRInput from "../engine/xrinput";
 const photo1 = require("./assets/images/photo1.jpg");
 const photo2 = require("./assets/images/photo2.jpg");
 
-// const Q = Croquet.Constants;
-// Q.MAX_POINTS = 10000;
-
 class ViewerView extends Croquet.View {
   constructor(model) {
     super(model);
@@ -63,7 +60,7 @@ class ViewerView extends Croquet.View {
     // input init
     // default to right hand.
     // avoid XRInputs data structures due to XRPK oninputsourcechange bug
-    this.primaryController = Renderer.xr.getController(1);
+    this.primaryController = Renderer.xr.getController(0);
     this.scene.add(this.primaryController);
     this.CreateSkybox();
     this.CreateSelectionOrb();
@@ -99,7 +96,7 @@ class ViewerView extends Croquet.View {
   }
 
   CreateSkybox() {
-    let geometry = new SphereBufferGeometry(5216, 180, 180);
+    let geometry = new SphereBufferGeometry(500, 180, 180);
     geometry.scale(- 1, 1, 1);
 
     let photoTexture = this.photos[this.currentPhoto];
