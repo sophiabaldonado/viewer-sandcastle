@@ -14,9 +14,6 @@ import loadScene from "../engine/engine";
 import Renderer from "../engine/renderer";
 import XRInput from "../engine/xrinput";
 
-const photo1 = require("./assets/images/photo1.jpg");
-const photo2 = require("./assets/images/photo2.jpg");
-
 class ViewerView extends Croquet.View {
   constructor(model) {
     super(model);
@@ -26,7 +23,18 @@ class ViewerView extends Croquet.View {
     loadScene(this.scene);
     this.loader = new TextureLoader();
 
-    this.photos = [this.loader.load(photo1), this.loader.load(photo2)];
+    this.photos = [
+      this.loader.load(require("./assets/images/photo1.jpg")),
+      this.loader.load(require("./assets/images/photo2.jpg")),
+      this.loader.load(require("./assets/images/168BFF65-4395-4C32-8C00-8D512118DB28.jpg")),
+      this.loader.load(require("./assets/images/PANO_20150408_183912.jpg")),
+      this.loader.load(require("./assets/images/PANO_20160222_122611.jpg")),
+      this.loader.load(require("./assets/images/PANO_20160410_103408.jpg")),
+      this.loader.load(require("./assets/images/PANO_20190710_105358.jpg")),
+      this.loader.load(require("./assets/images/PANO_20200302_132151.jpg")),
+      this.loader.load(require("./assets/images/PANO_20191112_182609.jpg")),
+    ];
+
     this.orbRadius = .15;
 
     // croquet events
