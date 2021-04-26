@@ -12,10 +12,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@croquet/croquet": "0.3.3",
+    "@croquet/croquet": "^0.4.1-1",
     "cannon": "^0.6.2",
     "firebase": "^7.14.5",
     "inquirer": "^7.2.0",
+    "pluto-mae": "^0.7.1",
     "speak-tts": "^2.0.8",
     "three": "^0.118.1"
   },

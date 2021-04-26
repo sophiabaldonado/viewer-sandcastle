@@ -20,19 +20,19 @@ const photo2 = require("./assets/images/photo2.jpg");
 class ViewerView extends Croquet.View {
   constructor(model) {
     super(model);
+    this.sceneModel = model;
 
     this.scene = new Scene();
-    this.scene.add(new AmbientLight(0xffffff, 4));
     loadScene(this.scene);
     this.loader = new TextureLoader();
 
     this.photos = [this.loader.load(photo1), this.loader.load(photo2)];
-    this.orbRadius = .15;
+    this.orbRadius = 0.15;
 
     // croquet events
     this.subscribe("viewer", "selectphoto", this.LoadPhoto);
 
-    this.currentPhoto = 0;
+    this.currentPhoto = this.sceneModel.photoIndex;
     this.isSelecting = false;
 
     //xrpk alternative using gamepad:
@@ -50,7 +50,11 @@ class ViewerView extends Croquet.View {
           }
         });
 
-        if (this.pressedButton && this.pressedButton.pressed === false && this.isSelecting === true) {
+        if (
+          this.pressedButton &&
+          this.pressedButton.pressed === false &&
+          this.isSelecting === true
+        ) {
           this.isSelecting = false;
         }
       });
@@ -64,6 +68,13 @@ class ViewerView extends Croquet.View {
     this.scene.add(this.primaryController);
     this.CreateSkybox();
     this.CreateSelectionOrb();
+
+    // placeholder for testing
+    window.addEventListener("keydown", e => {
+      if (e.key == "ArrowRight" || e.key == "ArrowLeft") {
+        this.CyclePhoto();
+      }
+    });
   }
 
   HandlePhotoSelection(e, button) {
@@ -75,9 +86,11 @@ class ViewerView extends Croquet.View {
     });
     this.primaryController = Renderer.xr.getController(this.primaryIndex);
 
-    let handInSphere = this.SphereDistanceTest(this.primaryController.position, this.orbRadius)
-    if (handInSphere)
-      this.CyclePhoto();
+    let handInSphere = this.SphereDistanceTest(
+      this.primaryController.position,
+      this.orbRadius
+    );
+    if (handInSphere) this.CyclePhoto();
   }
 
   SphereDistanceTest(pos, dist) {
@@ -88,7 +101,7 @@ class ViewerView extends Croquet.View {
     this.selectionOrb.getWorldPosition(spherePos);
     let d = controllerPos.sub(spherePos);
 
-    return (d.x * d.x + d.y * d.y + d.z * d.z) < Math.pow(dist, 2);
+    return d.x * d.x + d.y * d.y + d.z * d.z < Math.pow(dist, 2);
   }
 
   LoadPhoto(data) {
@@ -97,27 +110,27 @@ class ViewerView extends Croquet.View {
 
   CreateSkybox() {
     let geometry = new SphereBufferGeometry(500, 180, 180);
-    geometry.scale(- 1, 1, 1);
+    geometry.scale(-1, 1, 1);
 
     let photoTexture = this.photos[this.currentPhoto];
     this.skyboxMaterial = new MeshBasicMaterial({
-        map: photoTexture,
-        precision: "highp",
+      map: photoTexture,
+      precision: "highp",
     });
     this.skybox = new Mesh(geometry, this.skyboxMaterial);
     this.scene.add(this.skybox);
-  };
+  }
 
   CreateSelectionOrb() {
     let photoTexture = this.photos[this.NextPhoto()];
 
     let geometry = new SphereGeometry(this.orbRadius, 20, 20);
-    geometry.scale(- 1, 1, 1);
+    geometry.scale(-1, 1, 1);
     let material = new MeshBasicMaterial({
       color: 0xffffff,
       map: photoTexture,
     });
-    let sphere = new Mesh( geometry, material );
+    let sphere = new Mesh(geometry, material);
     sphere.position.setY(1.2);
     sphere.position.setZ(-1);
 
@@ -129,7 +142,7 @@ class ViewerView extends Croquet.View {
     this.currentPhoto = index;
 
     this.skybox.material.map = this.photos[this.currentPhoto];
-    this.selectionOrb.material.map = this.photos[this.NextPhoto()]
+    this.selectionOrb.material.map = this.photos[this.NextPhoto()];
   }
 
   CyclePhoto() {
