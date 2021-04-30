@@ -3,8 +3,6 @@ import { PerspectiveCamera, AudioListener } from "three";
 import EngineEditorCamera from "./util/cameracontrols/engineeditorcamera";
 import SessionHandler from "./util/webxr/sessionhandler";
 import Renderer from "./renderer";
-import Physics from "./physics/physics";
-// import PhysicsSolver from './physics.worker.js';
 import XRInput from "./xrinput";
 
 // editor camera + audiolistener
@@ -26,8 +24,6 @@ const loadScene = scene => {
     Renderer.render(scene, Camera);
     // INPUT
     if (State.isXRSession) XRInput.Update();
-    // PHYSICS
-    if (!State.isPaused) Physics.Update();
 
     // TRAVERSE UPDATE METHODS IN SCENE OBJECTS
     scene.traverse(obj => {

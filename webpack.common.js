@@ -79,6 +79,20 @@ module.exports = {
         ],
       },
       {
+        test: /\.(mp4|webm)$/,
+        use: [
+          {
+            loader: "file-loader",
+            options: {
+              esModule: false,
+              name: "[name].[ext]",
+              outputPath: "assets/videos/",
+              publicPath: "assets/videos/",
+            },
+          },
+        ],
+      },
+      {
         test: /\.(ogg|mp3|wav|mpe?g)$/,
         use: [
           {

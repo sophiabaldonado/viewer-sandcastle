@@ -13,7 +13,7 @@ const Viewer = () => {
   const xrpkAppId = pmaEventHandler.getAppState().appId;
   const appId = "com.plutovr.threesixtyviewer";
   // const name = xrpkAppId ? xrpkAppId : Math.floor(Math.random() * 123456789);
-  const name = xrpkAppId ? xrpkAppId : "test";
+  const name = xrpkAppId ? xrpkAppId : "test9";
   const password = "password";
 
   Croquet.Session.join({
