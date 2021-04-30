@@ -17,6 +17,11 @@ import {
   RGBAFormat,
   PlaneBufferGeometry,
   LoadingManager,
+  Raycaster,
+  LineBasicMaterial,
+  Line,
+  Matrix4,
+  BufferGeometry,
 } from "three";
 
 import loadScene from "../engine/engine";
@@ -47,6 +52,14 @@ class ViewerView extends Croquet.View {
     this.createOrbContainer();
     this.createLoaderIcon();
 
+    Camera.Update = () => {
+      if (!State.isXRSession) return;
+      Camera.matrixWorld.decompose(
+        Camera.position,
+        Camera.quaternion,
+        Camera.scale
+      );
+    };
     Promise.all([
       this.loader.load(photo1),
       this.loader.load(photo2),
@@ -73,34 +86,38 @@ class ViewerView extends Croquet.View {
     //xrpk alternative using gamepad:
     const InputHandler = new Object3D();
 
-    InputHandler.Update = () => {
-      if (!XRInput.inputSources) return;
-      XRInput.inputSources.forEach(e => {
-        if (!e.gamepad) return;
-        e.gamepad.buttons.forEach((button, i) => {
-          if (button.pressed === true && this.isselecting === false) {
-            this.pressedButton = button;
-            this.isselecting = true;
-            this.HandlePhotoselection(e, button);
-          }
-        });
+    // XR controllers
+    this._raycaster = new Raycaster();
+    this._tempMatrix = new Matrix4();
+    this._controller1 = Renderer.xr.getController(0);
+    this._controller2 = Renderer.xr.getController(1);
+    this._controller1.handedness = "left";
+    this._controller2.handedness = "right";
+    this._controllers = [this._controller1, this._controller2];
+    this._controllers.forEach(controller => {
+      this.scene.add(controller);
+      this.addRayCastVisualizer(controller);
+      controller.Update = () => {
+        controller._raycastAt = this.raycast(controller);
+        controller.children[0].material.opacity =
+          controller._raycastAt == undefined ? 0 : 1;
+        if (!controller._raycastAt) return;
+        // const d = controller.position.distanceTo(
+        //   controller._raycastAt.position
+        // );
+        // controller.children[0].scale.setScalar(d);
+        // controller.children[0].geometry.needsUpdate = true;
+      };
+    });
 
-        if (
-          this.pressedButton &&
-          this.pressedButton.pressed === false &&
-          this.isselecting === true
-        ) {
-          this.isselecting = false;
-        }
-      });
-    };
-    this.scene.add(InputHandler);
-
-    // input init
-    // default to right hand.
-    // avoid XRInputs data structures due to XRPK oninputsourcechange bug
-    this.primaryController = Renderer.xr.getController(0);
-    this.scene.add(this.primaryController);
+    State.eventHandler.addEventListener(
+      "selectstart",
+      this.onSelectStart.bind(this)
+    );
+    State.eventHandler.addEventListener(
+      "selectend",
+      this.onSelectEnd.bind(this)
+    );
 
     // placeholder for testing
     window.addEventListener("keydown", e => {
@@ -114,10 +131,14 @@ class ViewerView extends Croquet.View {
     });
 
     State.eventHandler.addEventListener("xrsessionstarted", e => {
-      this.resetOrbContainer();
+      setTimeout(() => {
+        this.resetOrbContainer();
+      }, 100);
     });
     State.eventHandler.addEventListener("xrsessionended", e => {
-      this.resetOrbContainer();
+      setTimeout(() => {
+        this.resetOrbContainer();
+      }, 100);
     });
   }
 
@@ -140,17 +161,6 @@ class ViewerView extends Croquet.View {
       this.orbRadius
     );
     if (handInSphere) this.CyclePhoto();
-  }
-
-  sphereDistanceTest(pos, dist) {
-    if (!this.selectionOrb) return;
-
-    let controllerPos = new Vector3(pos.x, pos.y, pos.z);
-    let spherePos = new Vector3();
-    this.selectionOrb.getWorldPosition(spherePos);
-    let d = controllerPos.sub(spherePos);
-
-    return d.x * d.x + d.y * d.y + d.z * d.z < Math.pow(dist, 2);
   }
 
   loadPhoto(data) {
@@ -176,6 +186,7 @@ class ViewerView extends Croquet.View {
 
   createOrbContainer() {
     this.orbContainer = new Object3D();
+    this.orbContainer.raycastable = true;
     this.scene.add(this.orbContainer);
     this.frontAnchor = new Object3D();
     this.frontAnchor.position.z -= 1;
@@ -246,6 +257,7 @@ class ViewerView extends Croquet.View {
         -Math.sin(this.clock.getElapsedTime() * 2) / 40;
       this.selectionOrb1.material.map.offset.x += 0.0005;
     };
+    this.selectionOrb1.inc = -1;
     this.orbContainer.add(this.selectionOrb1);
 
     this.selectionOrb2 = sphere.clone();
@@ -257,6 +269,8 @@ class ViewerView extends Croquet.View {
         Math.sin(this.clock.getElapsedTime() * 2) / 40;
       this.selectionOrb2.material.map.offset.x += 0.0005;
     };
+    this.selectionOrb2.inc = 1;
+
     this.orbContainer.add(this.selectionOrb2);
   }
 
@@ -303,15 +317,15 @@ class ViewerView extends Croquet.View {
 
     // load Manager
     this.loadManager.onStart = function (url, itemsLoaded, itemsTotal) {
-      console.log(
-        "Started loading file: " +
-          url +
-          ".\nLoaded " +
-          itemsLoaded +
-          " of " +
-          itemsTotal +
-          " files."
-      );
+      // console.log(
+      //   "Started loading file: " +
+      //     url +
+      //     ".\nLoaded " +
+      //     itemsLoaded +
+      //     " of " +
+      //     itemsTotal +
+      //     " files."
+      // );
     };
 
     this.loadManager.onLoad = () => {
@@ -322,20 +336,81 @@ class ViewerView extends Croquet.View {
     };
 
     this.loadManager.onProgress = (url, itemsLoaded, itemsTotal) => {
-      console.log(
-        "Loading file: " +
-          url +
-          ".\nLoaded " +
-          itemsLoaded +
-          " of " +
-          itemsTotal +
-          " files."
-      );
+      // console.log(
+      //   "Loading file: " +
+      //     url +
+      //     ".\nLoaded " +
+      //     itemsLoaded +
+      //     " of " +
+      //     itemsTotal +
+      //     " files."
+      // );
     };
 
     this.loadManager.onError = url => {
       console.log("There was an error loading " + url);
     };
+  }
+
+  addRayCastVisualizer(controller) {
+    const geometry = new BufferGeometry().setFromPoints([
+      new Vector3(0, 0, 0),
+      new Vector3(0, 0, -1),
+    ]);
+
+    const mat = new LineBasicMaterial({
+      color: 0xffff00,
+      transparent: true,
+    });
+    const line = new Line(geometry, mat);
+    line.name = "line";
+    line.ignoreRaycast = true;
+    controller.add(line);
+  }
+  raycast(controller) {
+    if (!controller) {
+      console.error("no controller found!");
+      return;
+    }
+    this._tempMatrix.identity().extractRotation(controller.matrixWorld);
+    this._raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+    this._raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this._tempMatrix);
+
+    const intersects = this._raycaster.intersectObject(this.orbContainer, true);
+    return this.getIntersections(intersects);
+  }
+
+  getIntersections(intersects) {
+    if (!intersects.length) return;
+    for (let i = 0; i < intersects.length; i++) {
+      return intersects[0].object;
+    }
+  }
+
+  onSelectEnd(e) {}
+  onSelectStart(e) {
+    this.onselect(this.getControllerFromInputSource(e));
+  }
+
+  onselect(controller) {
+    if (
+      controller._raycastAt == undefined ||
+      controller._raycastAt.ignoreRaycast ||
+      !controller._raycastAt.inc
+    )
+      return;
+    this.incrementPhotoIndex(controller._raycastAt.inc);
+  }
+
+  getControllerFromInputSource(event) {
+    const c = this._controllers.find(
+      controller => controller.handedness === event.inputSource.handedness
+    );
+    if (!c)
+      throw Error(
+        `no controller matching event's handedness found!\n${this._controllers[0].handedness}\n${this._controllers[1].handedness}\n${event.inputSource.handedness}`
+      );
+    else return c;
   }
 }
 
