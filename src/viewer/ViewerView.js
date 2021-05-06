@@ -5,17 +5,20 @@ import State from "../engine/state";
 import Input from "./input";
 import UI from "./ui";
 
+const Q = Croquet.Constants;
+
 class ViewerView extends Croquet.View {
   constructor(model) {
     super(model);
     this.sceneModel = model;
+
     State.currentPhotoIndex = this.sceneModel.photoIndex;
     if (this.sceneModel.initialPositionArr)
       State.initialPosition = new Vector3().fromArray(
         this.sceneModel.initialPositionArr
       );
-    // croquet events
-    this.subscribe("viewer", "selectphoto", this.selectPhoto);
+
+    this.subscribe("viewer", Q.SELECT_PHOTO, this.selectPhoto);
 
     State.eventHandler.addEventListener(
       "incrementphotoindex",
@@ -36,7 +39,7 @@ class ViewerView extends Croquet.View {
   incrementPhotoIndex(increment) {
     this.currentPhotoIndex = this.ui.retrieveNextPhotoIndex(increment);
     const data = { photoIndex: this.currentPhotoIndex };
-    this.publish("model", "incrementphotoindex", data);
+    this.publish("model", Q.INCREMENT_PHOTO_INDEX, data);
   }
   selectPhoto(data) {
     State.eventHandler.dispatchEvent("selectphoto", data);
@@ -44,7 +47,7 @@ class ViewerView extends Croquet.View {
 
   setInitPosition(initPosition) {
     const initPosArr = initPosition.toArray();
-    this.publish("model", "setinitposition", initPosArr);
+    this.publish("model", Q.SET_INIT_POSITION, initPosArr);
   }
 }
 export default ViewerView;

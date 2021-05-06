@@ -4,6 +4,16 @@ import ViewerView from "./ViewerView";
 import PMAEventHandler from "pluto-mae";
 const pmaEventHandler = new PMAEventHandler();
 
+const Q = Croquet.Constants;
+// events
+Q.INCREMENT_PHOTO_INDEX = "incrementphotoindex";
+Q.SELECT_PHOTO = "selectphoto";
+Q.SET_INIT_POSITION = "setinitposition";
+
+// state
+Q.INTIAL_POSITION = undefined;
+Q.PHOTO_INDEX = 0;
+
 const Viewer = () => {
   ViewerModel.register("ViewerModel");
 

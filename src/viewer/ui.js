@@ -116,16 +116,14 @@ class UI {
   }
   setInitPosition() {
     if (State.initialPosition) {
-      console.log("setting initpos from State (model)");
       this.orbContainer.position.copy(State.initialPosition);
     } else {
       let initialPosition = this.pmaEventHandler.getAppState().initialPosition;
       if (initialPosition) {
-        console.log("setting initial position from PMA");
         State.eventHandler.dispatchEvent("setinitposition", initialPosition);
         this.orbContainer.position.copy(initialPosition);
       } else {
-        console.log(
+        console.warn(
           "no initial position provided, defaulting to Vector3().Zero"
         );
       }
