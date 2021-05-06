@@ -51,6 +51,8 @@ class StateClass {
     this.eventHandler.registerEvent("squeeze");
     this.eventHandler.registerEvent("peerconnected");
     this.eventHandler.registerEvent("peerdisconnected");
+    this.eventHandler.registerEvent("incrementphotoindex");
+    this.eventHandler.registerEvent("selectphoto");
     this.bindKeys();
   }
 
