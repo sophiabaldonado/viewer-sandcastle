@@ -2,11 +2,11 @@ import * as Croquet from "@croquet/croquet";
 import ViewerModel from "./ViewerModel";
 import ViewerView from "./ViewerView";
 import PMAEventHandler from "pluto-mae";
+const pmaEventHandler = new PMAEventHandler();
 
 const Viewer = () => {
   ViewerModel.register("ViewerModel");
 
-  const pmaEventHandler = new PMAEventHandler();
   const xrpkAppId = pmaEventHandler.getAppState().appId;
   const appId = "com.plutovr.threesixtyviewer";
   const name = xrpkAppId ? xrpkAppId : Math.floor(Math.random() * 123456789);

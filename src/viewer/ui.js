@@ -17,8 +17,8 @@ import {
   LoadingManager,
 } from "three";
 import Renderer from "../engine/renderer";
-import { Camera } from "../engine/engine";
 import State from "../engine/state";
+import PMAEventHandler from "pluto-mae";
 
 const loaderIconPath = require("./assets/videos/transparent.webm");
 const photo1 = require("./assets/images/photo1.jpg");
@@ -29,6 +29,7 @@ const photo5 = require("./assets/images/photo5.jpg");
 
 class UI {
   constructor(scene) {
+    this.pmaEventHandler = new PMAEventHandler();
     this.scene = scene;
     this.clock = new Clock();
     this.createGrid();
@@ -48,6 +49,8 @@ class UI {
 
     this.loadManager.onStart = (url, itemsLoaded, itemsTotal) => {};
     this.loadManager.onLoad = () => {
+      this.clearLoadingIcon();
+
       console.log("Loading complete!");
     };
     this.loadManager.onProgress = (url, itemsLoaded, itemsTotal) => {
@@ -57,7 +60,6 @@ class UI {
           this.createSkybox();
           break;
         case 3:
-          this.clearLoadingIcon();
           this.createSelectionOrbs();
           break;
         default:
@@ -110,26 +112,24 @@ class UI {
     this.orbContainer = new Object3D();
     this.orbContainer.name = "OrbContainer";
     this.scene.add(this.orbContainer);
-    this.frontAnchor = new Object3D();
-    this.frontAnchor.position.z -= 1;
-    setTimeout(() => {
-      Camera.add(this.frontAnchor);
-      Camera.position.z += 1;
-      this.resetOrbContainer();
-    }, 300);
+    this.setInitPosition();
   }
-  resetOrbContainer() {
-    this.camProxy = new Object3D();
-    const tempCamVec = new Vector3();
-    const tempFrontVec = new Vector3();
-    const tempQuat = new Quaternion();
-    const tempScale = new Vector3();
-
-    this.frontAnchor.matrixWorld.decompose(tempFrontVec, tempQuat, tempScale);
-    Camera.matrixWorld.decompose(tempCamVec, tempQuat, tempScale);
-    this.camProxy.position.copy(tempCamVec);
-    this.orbContainer.position.copy(tempFrontVec);
-    this.orbContainer.lookAt(this.camProxy.position);
+  setInitPosition() {
+    if (State.initialPosition) {
+      console.log("setting initpos from State (model)");
+      this.orbContainer.position.copy(State.initialPosition);
+    } else {
+      let initialPosition = this.pmaEventHandler.getAppState().initialPosition;
+      if (initialPosition) {
+        console.log("setting initial position from PMA");
+        State.eventHandler.dispatchEvent("setinitposition", initialPosition);
+        this.orbContainer.position.copy(initialPosition);
+      } else {
+        console.log(
+          "no initial position provided, defaulting to Vector3().Zero"
+        );
+      }
+    }
   }
   createLoaderIcon() {
     // loader icon

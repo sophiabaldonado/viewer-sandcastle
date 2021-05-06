@@ -53,6 +53,7 @@ class StateClass {
     this.eventHandler.registerEvent("peerdisconnected");
     this.eventHandler.registerEvent("incrementphotoindex");
     this.eventHandler.registerEvent("selectphoto");
+    this.eventHandler.registerEvent("setinitposition");
     this.bindKeys();
   }
 
