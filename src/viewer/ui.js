@@ -165,7 +165,7 @@ class UI {
     let sphere = new Mesh(geometry, orbMaterial1);
     sphere.position.setY(1.2);
     sphere.position.setZ(-1);
-
+    sphere.scale.set(1, 1, -1);
     this.selectionOrb1 = sphere.clone();
     this.selectionOrb1.position.setX(-0.5);
     this.selectionOrb1.material.map = photoTexture1;

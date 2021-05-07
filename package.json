@@ -18,7 +18,7 @@
     "inquirer": "^7.2.0",
     "pluto-mae": "^0.7.1",
     "speak-tts": "^2.0.8",
-    "three": "^0.128.0"
+    "three": "0.122.0"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
