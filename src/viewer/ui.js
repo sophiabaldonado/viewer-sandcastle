@@ -3,16 +3,11 @@ import {
   MeshBasicMaterial,
   Object3D,
   TextureLoader,
-  Vector3,
-  Quaternion,
   SphereGeometry,
   PMREMGenerator,
   Clock,
   EquirectangularReflectionMapping,
   RepeatWrapping,
-  VideoTexture,
-  RGBAFormat,
-  PlaneBufferGeometry,
   BoxGeometry,
   LoadingManager,
 } from "three";
@@ -20,7 +15,6 @@ import Renderer from "../engine/renderer";
 import State from "../engine/state";
 import PMAEventHandler from "pluto-mae";
 
-const loaderIconPath = require("./assets/videos/transparent.webm");
 const photo1 = require("./assets/images/photo1.jpg");
 const photo2 = require("./assets/images/photo2.jpg");
 const photo3 = require("./assets/images/photo3.jpg");
@@ -35,7 +29,6 @@ class UI {
     this.createGrid();
     this.createLoadManager();
     this.createOrbContainer();
-    this.createLoaderIcon();
     this.orbRadius = 0.15;
 
     State.eventHandler.addEventListener(
@@ -49,9 +42,7 @@ class UI {
 
     this.loadManager.onStart = (url, itemsLoaded, itemsTotal) => {};
     this.loadManager.onLoad = () => {
-      this.clearLoadingIcon();
-
-      console.log("Loading complete!");
+      console.log("360 Viewer Asset Loading complete!");
     };
     this.loadManager.onProgress = (url, itemsLoaded, itemsTotal) => {
       switch (itemsLoaded) {
@@ -86,10 +77,6 @@ class UI {
 
   clearGrid() {
     this.grid.visible = false;
-  }
-
-  clearLoadingIcon() {
-    this.loaderMesh.visible = false;
   }
   selectPhoto(data) {
     State.currentPhotoIndex = data.photoIndex;
@@ -129,26 +116,6 @@ class UI {
       }
     }
   }
-  createLoaderIcon() {
-    // loader icon
-    const loaderIcon = document.createElement("Video");
-    loaderIcon.src = loaderIconPath;
-    loaderIcon.load();
-    loaderIcon.play();
-    loaderIcon.loop = true;
-    const loaderTexture = new VideoTexture(loaderIcon);
-    loaderTexture.format = RGBAFormat;
-
-    const loaderGeo = new PlaneBufferGeometry(0.15, 0.15);
-    const loaderMat = new MeshBasicMaterial({
-      map: loaderTexture,
-      transparent: true,
-    });
-    this.loaderMesh = new Mesh(loaderGeo, loaderMat);
-    this.loaderMesh.position.z += 0.05;
-    this.loaderMesh.ignoreRaycast = true;
-    this.orbContainer.add(this.loaderMesh);
-  }
   createSelectionOrbs() {
     let photoTexture1 = this.photos[this.retrieveNextPhotoIndex(1)];
     let photoTexture2 = this.photos[this.retrieveNextPhotoIndex(-1)];
@@ -156,16 +123,16 @@ class UI {
     let geometry = new SphereGeometry(this.orbRadius, 20, 20);
     let orbMaterial1 = new MeshBasicMaterial({
       color: 0xbbbbbb,
-      transparent: false,
+      transparent: true,
     });
     let orbMaterial2 = new MeshBasicMaterial({
       color: 0xbbbbbb,
-      transparent: false,
+      transparent: true,
     });
     let sphere = new Mesh(geometry, orbMaterial1);
     sphere.position.setY(1.2);
     sphere.position.setZ(-1);
-    sphere.scale.set(1, 1, -1);
+    // sphere.scale.set(1, 1, -1);
     this.selectionOrb1 = sphere.clone();
     this.selectionOrb1.position.setX(-0.5);
     this.selectionOrb1.material.map = photoTexture1;

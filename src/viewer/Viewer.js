@@ -1,6 +1,6 @@
 import * as Croquet from "@croquet/croquet";
-import ViewerModel from "./ViewerModel";
-import ViewerView from "./ViewerView";
+import ViewerModel from "./viewerModel";
+import ViewerView from "./viewerView";
 import PMAEventHandler from "pluto-mae";
 const pmaEventHandler = new PMAEventHandler();
 
